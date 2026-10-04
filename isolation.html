@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<body>
+<h2>Edge InPrivate Isolation Test</h2>
+
+<button onclick="setData()">SET PRIVATE DATA</button>
+<button onclick="readData()">READ DATA</button>
+
+<pre id="result">Ready</pre>
+
+<script>
+function setData() {
+  localStorage.setItem("edge_secret", "INPRIVATE-SECRET-98765");
+  document.cookie = "edge_cookie=INPRIVATE-COOKIE-98765; path=/";
+  document.getElementById("result").textContent =
+    "Data written to this browsing context.";
+}
+
+function readData() {
+  document.getElementById("result").textContent =
+    "localStorage = " + (localStorage.getItem("edge_secret") || "NONE") +
+    "\ncookie = " + (document.cookie || "NONE");
+}
+</script>
+</body>
+</html>
