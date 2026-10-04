@@ -1,35 +1,129 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Edge InPrivate Isolation Test 2</title>
+
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+
+    button {
+      font-size: 18px;
+      padding: 12px;
+      margin: 8px 0;
+    }
+
+    pre {
+      margin-top: 20px;
+      padding: 15px;
+      background: #eee;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+  </style>
 </head>
+
 <body>
 
 <h2>Edge InPrivate Isolation Test 2</h2>
 
-<button onclick="setNormal()">SET NORMAL DATA</button>
-<br><br>
+<button onclick="setNormal()">
+  SET NORMAL DATA
+</button>
 
-<button onclick="setPrivate()">SET INPRIVATE DATA</button>
-<br><br>
+<br>
 
-<button onclick="readData()">READ DATA</button>
+<button onclick="setPrivate()">
+  SET INPRIVATE DATA
+</button>
+
+<br>
+
+<button onclick="readData()">
+  READ DATA
+</button>
 
 <pre id="result">Ready</pre>
 
 <script>
-function readData() {
+
+const STORAGE_KEY = "edge_isolation_v2_unique_20261005";
+const COOKIE_NAME = "edge_isolation_cookie_v2_unique_20261005";
+
+function setNormal() {
+
+  localStorage.setItem(
+    STORAGE_KEY,
+    "NORMAL-ONLY-V2-12345"
+  );
+
+  document.cookie =
+    COOKIE_NAME +
+    "=NORMAL-ONLY-V2-12345; Path=/; SameSite=Lax";
+
   document.getElementById("result").textContent =
-    "localStorage = " +
-    (localStorage.getItem("edge_boundary_test") || "NONE") +
-    "\n" +
-    "boundary_cookie = " +
-    (document.cookie
-      .split("; ")
-      .find(row => row.startsWith("edge_boundary_cookie=")) || "NONE");
+    "NORMAL DATA SET\n\n" +
+    "localStorage = NORMAL-ONLY-V2-12345\n" +
+    "cookie = NORMAL-ONLY-V2-12345";
 }
+
+
+function setPrivate() {
+
+  localStorage.setItem(
+    STORAGE_KEY,
+    "INPRIVATE-ONLY-V2-98765"
+  );
+
+  document.cookie =
+    COOKIE_NAME +
+    "=INPRIVATE-ONLY-V2-98765; Path=/; SameSite=Lax";
+
+  document.getElementById("result").textContent =
+    "INPRIVATE DATA SET\n\n" +
+    "localStorage = INPRIVATE-ONLY-V2-98765\n" +
+    "cookie = INPRIVATE-ONLY-V2-98765";
+}
+
+
+function getTestCookie() {
+
+  const cookies = document.cookie.split("; ");
+
+  for (const cookie of cookies) {
+
+    if (cookie.startsWith(COOKIE_NAME + "=")) {
+
+      return cookie.substring(
+        (COOKIE_NAME + "=").length
+      );
+
+    }
+
+  }
+
+  return "NONE";
+}
+
+
+function readData() {
+
+  const storage =
+    localStorage.getItem(STORAGE_KEY) || "NONE";
+
+  const cookie =
+    getTestCookie();
+
+  document.getElementById("result").textContent =
+    "localStorage = " + storage +
+    "\n" +
+    "cookie = " + cookie;
+}
+
 </script>
 
 </body>
