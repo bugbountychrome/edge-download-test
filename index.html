@@ -2,17 +2,28 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Edge Download Test</title>
+  <title>Cross-Origin Download Test</title>
 </head>
 <body>
-  <h1>Edge Download Test</h1>
 
-  <p>
-    <a href="/download">DIRECT DOWNLOAD</a>
-  </p>
+<h2>Cross-Origin Download Test</h2>
 
-  <p>
-    <a href="/redirect">REDIRECT → DOWNLOAD</a>
-  </p>
+<button onclick="directDownload()">
+  DIRECT CROSS-ORIGIN DOWNLOAD
+</button>
+
+<script>
+function directDownload() {
+  const a = document.createElement("a");
+
+  a.href = "https://edge-download-test.netlify.app/download";
+  a.download = "cross-origin-test.txt";
+
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+</script>
+
 </body>
 </html>
