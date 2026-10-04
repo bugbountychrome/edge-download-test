@@ -1,0 +1,4 @@
+/download
+  Content-Disposition: attachment; filename="test-download.txt"
+  Content-Type: text/plain
+  Cache-Control: no-store
