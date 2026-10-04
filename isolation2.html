@@ -20,39 +20,15 @@
 <pre id="result">Ready</pre>
 
 <script>
-function setNormal() {
-  localStorage.setItem(
-    "edge_boundary_test",
-    "NORMAL-ONLY-12345"
-  );
-
-  document.cookie =
-    "edge_boundary_cookie=NORMAL-ONLY-12345; path=/";
-
-  document.getElementById("result").textContent =
-    "NORMAL DATA SET";
-}
-
-function setPrivate() {
-  localStorage.setItem(
-    "edge_boundary_test",
-    "INPRIVATE-ONLY-98765"
-  );
-
-  document.cookie =
-    "edge_boundary_cookie=INPRIVATE-ONLY-98765; path=/";
-
-  document.getElementById("result").textContent =
-    "INPRIVATE DATA SET";
-}
-
 function readData() {
   document.getElementById("result").textContent =
     "localStorage = " +
     (localStorage.getItem("edge_boundary_test") || "NONE") +
     "\n" +
-    "cookie = " +
-    (document.cookie || "NONE");
+    "boundary_cookie = " +
+    (document.cookie
+      .split("; ")
+      .find(row => row.startsWith("edge_boundary_cookie=")) || "NONE");
 }
 </script>
 
