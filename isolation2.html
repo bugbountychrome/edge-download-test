@@ -1,0 +1,60 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Edge InPrivate Isolation Test 2</title>
+</head>
+<body>
+
+<h2>Edge InPrivate Isolation Test 2</h2>
+
+<button onclick="setNormal()">SET NORMAL DATA</button>
+<br><br>
+
+<button onclick="setPrivate()">SET INPRIVATE DATA</button>
+<br><br>
+
+<button onclick="readData()">READ DATA</button>
+
+<pre id="result">Ready</pre>
+
+<script>
+function setNormal() {
+  localStorage.setItem(
+    "edge_boundary_test",
+    "NORMAL-ONLY-12345"
+  );
+
+  document.cookie =
+    "edge_boundary_cookie=NORMAL-ONLY-12345; path=/";
+
+  document.getElementById("result").textContent =
+    "NORMAL DATA SET";
+}
+
+function setPrivate() {
+  localStorage.setItem(
+    "edge_boundary_test",
+    "INPRIVATE-ONLY-98765"
+  );
+
+  document.cookie =
+    "edge_boundary_cookie=INPRIVATE-ONLY-98765; path=/";
+
+  document.getElementById("result").textContent =
+    "INPRIVATE DATA SET";
+}
+
+function readData() {
+  document.getElementById("result").textContent =
+    "localStorage = " +
+    (localStorage.getItem("edge_boundary_test") || "NONE") +
+    "\n" +
+    "cookie = " +
+    (document.cookie || "NONE");
+}
+</script>
+
+</body>
+</html>
